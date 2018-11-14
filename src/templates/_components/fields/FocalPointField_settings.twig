@@ -1,0 +1,24 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Focal Point plugin for Craft CMS
+ *
+ * FocalPointField Field Settings
+ *
+ * @author    Værsågod
+ * @copyright Copyright (c) 2018 Værsågod
+ * @link      www.vaersaagod.no
+ * @package   FocalPoint
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: 'Default Focal Point',
+    instructions: 'Enter default position here.',
+    id: 'defaultFocalPoint',
+    name: 'defaultFocalPoint',
+    value: field['defaultFocalPoint']})
+}}

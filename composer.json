@@ -1,0 +1,40 @@
+{
+    "name": "vaersaagod/focal-point",
+    "description": "Brings back the custom Focal Point field",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "focal point"
+    ],
+    "support": {
+        "docs": "",
+        "issues": ""
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Værsågod",
+            "homepage": "www.vaersaagod.no"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "vaersaagod\\focalpoint\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Focal Point",
+        "handle": "focal-point",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "",
+        "class": "vaersaagod\\focalpoint\\FocalPoint"
+    }
+}
