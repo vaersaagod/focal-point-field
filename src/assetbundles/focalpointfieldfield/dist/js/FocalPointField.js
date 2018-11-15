@@ -12,28 +12,6 @@
 
  ;(function ( $, window, document, undefined ) {
 
-    $.fn.waitForImage = function () {
-        var def = $.Deferred();
-        var count = this.length;
-        this.each(function () {
-            if (this.complete) {
-                if (!--count) {
-                    def.resolve();
-                }
-            } else {
-                $(this).load(function () {
-                    if (!--count) {
-                        def.resolve();
-                    }
-                });
-            }
-        });
-        return def.promise();
-    };
-
-    var pluginName = "FocalPointFocalPointField",
-        defaults = {};
-
     var craftPositonTranslate = {
         'top-left': '0% 0%',
         'top-center': '50% 0%',
@@ -47,109 +25,114 @@
     };
 
     // Plugin constructor
-    function Plugin( element, options ) {
-        this.element = element;
-        this.options = $.extend( {}, defaults, options) ;
+    function Plugin( element ) {
+        $(function () {
+            var $field = $(element);
+            var $wrapper = $field.find('[data-focalpointfield]');
+            var $image = $field.find('[data-focalpointfield-image]');
+            var $input = $field.find('[data-focalpointfield-value]');
+            var $marker = $('<div data-focalpointfield-marker></div>');
+            var isDragging = false;
 
-        this._defaults = defaults;
-        this._name = pluginName;
+            function placeMarker(x, y) {
+                var width = $wrapper.outerWidth();
+                var height = $wrapper.outerHeight();
+                $marker.css({ top: Math.round((y/100)*height), left: Math.round((x/100)*width) });
+            }
 
-        this.init(element);
-    }
-
-    Plugin.prototype = {
-
-        init: function(element) {
-
-            $(function () {
-                var $field = $(element);
-                var $wrapper = $field.find('[data-focalpointfield]');
-                var $image = $field.find('[data-focalpointfield-image]');
-                var $input = $field.find('[data-focalpointfield-value]');
-                var $marker = $('<div data-focalpointfield-marker></div>');
-                var isDragging = false;
-
-                function placeMarker(x, y) {
-                    var width = $wrapper.outerWidth();
-                    var height = $wrapper.outerHeight();
-                    $marker.css({ top: Math.round((y/100)*height), left: Math.round((x/100)*width) });
+            function parseValue(val) {
+                $wrapper.append($marker);
+                if (craftPositonTranslate[val] !== undefined) {
+                    val = craftPositonTranslate[val];
                 }
 
-                function parseValue(val) {
-                    $wrapper.append($marker);
-                    if (craftPositonTranslate[val] !== undefined) {
-                        val = craftPositonTranslate[val];
-                    }
+                var arr = val.split(' ');
 
-                    var arr = val.split(' ');
-
-                    if (arr.length === 2) {
-                        var x = Math.max(0, Math.min(Number(arr[0].replace('%', '')), 100));
-                        var y = Math.max(0, Math.min(Number(arr[1].replace('%', '')), 100));
-                        placeMarker(x, y);
-                    }
-                }
-
-                function setValue(x, y) {
-                    $input.val(x + '% ' + y + '%');
+                if (arr.length === 2) {
+                    var x = Math.max(0, Math.min(Number(arr[0].replace('%', '')), 100));
+                    var y = Math.max(0, Math.min(Number(arr[1].replace('%', '')), 100));
                     placeMarker(x, y);
                 }
+            }
 
-                function parsePosition(pageX, pageY) {
-                    var precision = Math.pow(10, 2);
-                    var parentOffset = $wrapper.offset();
-                    var imageWidth = $wrapper.outerWidth();
-                    var imageHeight = $wrapper.outerHeight();
-                    var posX = pageX - parentOffset.left;
-                    var posY = pageY - parentOffset.top;
-                    var percentX = Math.round((posX/imageWidth)*100*precision) / precision;
-                    var percentY = Math.round((posY/imageHeight)*100*precision) / precision;
+            function setValue(x, y) {
+                $input.val(x + '% ' + y + '%');
+                placeMarker(x, y);
+            }
 
-                    percentX = Math.max(0, Math.min(percentX, 100));
-                    percentY = Math.max(0, Math.min(percentY, 100));
+            function parsePosition(pageX, pageY) {
+                var precision = Math.pow(10, 2);
+                var parentOffset = $wrapper.offset();
+                var imageWidth = $wrapper.outerWidth();
+                var imageHeight = $wrapper.outerHeight();
+                var posX = pageX - parentOffset.left;
+                var posY = pageY - parentOffset.top;
+                var percentX = Math.round((posX/imageWidth)*100*precision) / precision;
+                var percentY = Math.round((posY/imageHeight)*100*precision) / precision;
 
-                    setValue(percentX, percentY);
-                }
+                percentX = Math.max(0, Math.min(percentX, 100));
+                percentY = Math.max(0, Math.min(percentY, 100));
 
-                $wrapper.on('click', function (e) {
+                setValue(percentX, percentY);
+            }
+
+            $wrapper.on('click', function (e) {
+                parsePosition(e.pageX, e.pageY);
+            });
+
+            $marker.on('mousedown', function (e) {
+                isDragging = true;
+            });
+
+            $marker.on('mouseup', function (e) {
+                isDragging = false;
+            });
+
+            $wrapper.on('mouseleave', function (e) {
+                isDragging = false;
+            });
+
+            $(window).on('mousemove', function (e) {
+                if (isDragging) {
                     parsePosition(e.pageX, e.pageY);
-                });
-
-                $marker.on('mousedown', function (e) {
-                    isDragging = true;
-                });
-
-                $marker.on('mouseup', function (e) {
-                    isDragging = false;
-                });
-
-                $wrapper.on('mouseleave', function (e) {
-                    isDragging = false;
-                });
-
-                $(window).on('mousemove', function (e) {
-                    if (isDragging) {
-                        parsePosition(e.pageX, e.pageY);
-                    }
-                });
-
-                if ($wrapper.length > 0) {
-                    $image.waitForImage().done(function(){
-                       setTimeout(function(){
-                           parseValue($input.val() || '50% 50%');
-                       }, 100);
-                    });
                 }
             });
-        }
+
+            if ($wrapper.length > 0) {
+                $image.waitForImages().done(function(){
+                    setTimeout(function(){
+                        parseValue($input.val() || '50% 50%');
+                    }, 100);
+                });
+            }
+        });
+    }
+
+    var pluginName = 'FocalPointField';
+
+    $.fn.waitForImages = function () {
+        var def = $.Deferred();
+        var count = this.length;
+        this.each(function () {
+            if (this.complete) {
+                if (!--count) {
+                    def.resolve();
+                }
+            } else {
+                $(this).on('load', function () {
+                    if (!--count) {
+                        def.resolve();
+                    }
+                });
+            }
+        });
+        return def.promise();
     };
 
-    // A really lightweight plugin wrapper around the constructor,
-    // preventing against multiple instantiations
     $.fn[pluginName] = function ( options ) {
         return this.each(function () {
-            if (!$.data(this, "plugin_" + pluginName)) {
-                $.data(this, "plugin_" + pluginName,
+            if (!$.data(this, 'plugin_' + pluginName)) {
+                $.data(this, 'plugin_' + pluginName,
                 new Plugin( this, options ));
             }
         });
