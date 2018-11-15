@@ -108,7 +108,7 @@
         });
     }
 
-    var pluginName = 'FocalPointField';
+    var pluginName = 'FocalPointFocalPointField';
 
     $.fn.waitForImages = function () {
         var def = $.Deferred();
