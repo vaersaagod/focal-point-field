@@ -19,6 +19,7 @@ use craft\base\Field;
 use craft\helpers\Db;
 use yii\db\Schema;
 use craft\helpers\Json;
+use craft\elements\Asset;
 
 /**
  * @author    Værsågod
@@ -57,7 +58,7 @@ class FocalPointField extends Field
         $rules = parent::rules();
         $rules = array_merge($rules, [
             ['defaultFocalPoint', 'string'],
-            ['defaultFocalPoint', 'default', 'value' => '50% 50%'],
+            ['defaultFocalPoint', 'default', 'value' => json_encode(['x' => '50', 'y' => '50', 'css' => '50% 50%'], true)],
         ]);
         return $rules;
     }
@@ -75,6 +76,9 @@ class FocalPointField extends Field
      */
     public function normalizeValue($value, ElementInterface $element = null)
     {
+        if (\is_string($value)) {
+            $value = json_decode($value, true);
+        }
         return $value;
     }
 
@@ -118,7 +122,7 @@ class FocalPointField extends Field
             'name' => $this->handle,
             'namespace' => $namespacedId,
             'prefix' => Craft::$app->getView()->namespaceInputId(''),
-            ];
+        ];
         $jsonVars = Json::encode($jsonVars);
         Craft::$app->getView()->registerJs("$('#{$namespacedId}-field').FocalPointFocalPointField(" . $jsonVars . ");");
 
@@ -131,7 +135,7 @@ class FocalPointField extends Field
                 'field' => $this,
                 'id' => $id,
                 'namespacedId' => $namespacedId,
-                'asset' => $element->owner,
+                'asset' => $element->owner instanceof Asset ? $element->owner : null,
             ]
         );
     }

@@ -18,7 +18,7 @@
         <div data-focalpointfield>
             <img src="{{ asset.getUrl({ width: 300 }) }}" width="300" title="{{ 'Click image to set focal point' | t }}" draggable="false" data-focalpointfield-image>
         </div>
-        <input type="hidden" name="{{ name }}" value="{{ value ?? '' }}" data-focalpointfield-value>
+        <input type="hidden" name="{{ name }}" value="{{ value | json_encode(true) }}" data-focalpointfield-value>
     {% else %}
         <span data-focalpointfield-error>{{ 'This is not an image' | t }}</span>
     {% endif %}

@@ -10,18 +10,12 @@
  * @since     1.0.0FocalPointFocalPointField
  */
 
- ;(function ( $, window, document, undefined ) {
+;(function ( $, window, document, undefined ) {
 
-    var craftPositonTranslate = {
-        'top-left': '0% 0%',
-        'top-center': '50% 0%',
-        'top-right': '100% 0%',
-        'center-left': '0% 50%',
-        'center-center': '50% 50%',
-        'center-right': '100% 50%',
-        'bottom-left': '0% 100%',
-        'bottom-center': '50% 100%',
-        'bottom-right': '100% 100%'
+    var defaultValue = {
+        x: 50,
+        y: 50,
+        css: '50% 50%',
     };
 
     // Plugin constructor
@@ -33,6 +27,7 @@
             var $input = $field.find('[data-focalpointfield-value]');
             var $marker = $('<div data-focalpointfield-marker></div>');
             var isDragging = false;
+            var currentValue = null;
 
             function placeMarker(x, y) {
                 var width = $wrapper.outerWidth();
@@ -42,22 +37,21 @@
 
             function parseValue(val) {
                 $wrapper.append($marker);
-                if (craftPositonTranslate[val] !== undefined) {
-                    val = craftPositonTranslate[val];
+                try {
+                    currentValue = JSON.parse($input.val());
+                } catch(e) {
+                    currentValue = defaultValue;
                 }
-
-                var arr = val.split(' ');
-
-                if (arr.length === 2) {
-                    var x = Math.max(0, Math.min(Number(arr[0].replace('%', '')), 100));
-                    var y = Math.max(0, Math.min(Number(arr[1].replace('%', '')), 100));
-                    placeMarker(x, y);
-                }
+                placeMarker(currentValue.x, currentValue.y);
             }
 
             function setValue(x, y) {
-                $input.val(x + '% ' + y + '%');
                 placeMarker(x, y);
+                $input.val(JSON.stringify({
+                    x: x,
+                    y: y,
+                    css: x + '% ' + y + ' %'
+                }));
             }
 
             function parsePosition(pageX, pageY) {
@@ -100,9 +94,7 @@
 
             if ($wrapper.length > 0) {
                 $image.waitForImages().done(function(){
-                    setTimeout(function(){
-                        parseValue($input.val() || '50% 50%');
-                    }, 100);
+                    setTimeout(parseValue, 100);
                 });
             }
         });
@@ -133,7 +125,7 @@
         return this.each(function () {
             if (!$.data(this, 'plugin_' + pluginName)) {
                 $.data(this, 'plugin_' + pluginName,
-                new Plugin( this, options ));
+                    new Plugin( this, options ));
             }
         });
     };
