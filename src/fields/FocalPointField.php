@@ -36,6 +36,11 @@ class FocalPointField extends Field
      */
     public $defaultFocalPoint = '50% 50%';
 
+    /**
+     * @var array|null
+     */
+    public $defaultPointArray;
+
     // Static Methods
     // =========================================================================
 
