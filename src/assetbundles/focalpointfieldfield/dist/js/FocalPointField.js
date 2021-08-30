@@ -40,8 +40,9 @@
                 try {
                     currentValue = JSON.parse($input.val());
                 } catch(e) {
-                    currentValue = defaultValue;
+                    currentValue = null;
                 }
+                currentValue = currentValue || defaultValue;
                 placeMarker(currentValue.x, currentValue.y);
             }
 
