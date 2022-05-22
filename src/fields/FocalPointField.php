@@ -1,108 +1,118 @@
 <?php
 /**
- * Focal Point plugin for Craft CMS 3.x
+ * Focal Point Field plugin for Craft CMS 4.x
  *
- * Lorem
- *
- * @link      www.vaersaagod.no
- * @copyright Copyright (c) 2018 Værsågod
+ * @link      https://www.vaersaagod.no
+ * @copyright Copyright (c) 2022 Værsågod
  */
 
-namespace vaersaagod\focalpoint\fields;
-
-use vaersaagod\focalpoint\FocalPoint;
-use vaersaagod\focalpoint\assetbundles\focalpointfieldfield\FocalPointFieldFieldAsset;
+namespace vaersaagod\focalpointfield\fields;
 
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
+use craft\helpers\Cp;
 use craft\helpers\Db;
-use yii\db\Schema;
 use craft\helpers\Json;
+use craft\helpers\Html;
 use craft\elements\Asset;
+
+use vaersaagod\focalpointfield\FocalPoint;
+use vaersaagod\focalpointfield\assetbundles\FocalPointFieldAsset;
+
+use yii\db\Schema;
 
 /**
  * @author    Værsågod
- * @package   FocalPoint
+ * @package   Focal Point Field
  * @since     1.0.0
  */
 class FocalPointField extends Field
 {
-    // Public Properties
-    // =========================================================================
 
-    /**
-     * @var string
-     */
-    public $defaultFocalPoint = '50% 50%';
+    /** @var string */
+    public string $defaultFocalPoint = '50% 50%';
 
-    /**
-     * @var array|null
-     */
-    public $defaultPointArray;
+    /** @var int */
+    public int $maxThumbWidth = 300;
 
-    // Static Methods
-    // =========================================================================
+    /** @var int */
+    public int $maxThumbHeight = 300;
 
-    /**
-     * @inheritdoc
-     */
+    /** @var string[] */
+    public array $allowedKinds = [Asset::KIND_IMAGE];
+
+    /** @var array|null */
+    /** @deprecated in 2.0.0 */
+    public ?array $defaultPointArray = null;
+
+    /** @inheritdoc */
     public static function displayName(): string
     {
-        return Craft::t('focal-point', 'FocalPoint Field');
+        return 'Focal Point Field';
     }
 
-    // Public Methods
-    // =========================================================================
-
-    /**
-     * @inheritdoc
-     */
-    public function rules()
+    /** @inheritdoc */
+    public function rules(): array
     {
         $rules = parent::rules();
-        $rules = array_merge($rules, [
-            ['defaultFocalPoint', 'string'],
-            ['defaultFocalPoint', 'default', 'value' => json_encode(['x' => '50', 'y' => '50', 'css' => '50% 50%'], true)],
-        ]);
+        $rules[] = [['defaultFocalPoint'], 'string'];
+        $rules[] = [['defaultFocalPoint'], 'default', 'value' => json_encode(['x' => '50', 'y' => '50', 'css' => '50% 50%'], true)];
+        $rules[] = [['maxThumbWidth', 'maxThumbHeight'], 'number', 'integerOnly' => true, 'min' => 50];
         return $rules;
     }
 
-    /**
-     * @inheritdoc
-     */
+    /** @inheritdoc */
     public function getContentColumnType(): string
     {
         return Schema::TYPE_STRING;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function normalizeValue($value, ElementInterface $element = null)
+    /** @inheritdoc */
+    public function normalizeValue(mixed $value, ?ElementInterface $element = null): mixed
     {
-        if (\is_string($value)) {
+        if (is_string($value)) {
             $value = json_decode($value, true);
         }
         return $value;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function serializeValue($value, ElementInterface $element = null)
+    /** @inheritdoc */
+    public function getSettingsHtml(): ?string
     {
-        return parent::serializeValue($value, $element);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getSettingsHtml()
-    {
+        return
+            Cp::textFieldHtml([
+                'label' => Craft::t('focal-point-field', 'Default Focal Point'),
+                'id' => 'defaultFocalPoint',
+                'name' => 'defaultFocalPoint',
+                'value' => $this->defaultFocalPoint,
+                'errors' => $this->getErrors('defaultFocalPoint'),
+            ]) .
+            Cp::textFieldHtml([
+                'label' => Craft::t('focal-point-field', 'Max Thumb Width'),
+                'id' => 'maxThumbWidth',
+                'name' => 'maxThumbWidth',
+                'type' => 'number',
+                'size' => 5,
+                'min' => '50',
+                'step' => '10',
+                'value' => $this->maxThumbWidth,
+                'errors' => $this->getErrors('maxThumbWidth'),
+            ]) .
+            Cp::textFieldHtml([
+                'label' => Craft::t('focal-point-field', 'Max Thumb Height'),
+                'id' => 'maxThumbHeight',
+                'name' => 'maxThumbHeight',
+                'type' => 'number',
+                'size' => 5,
+                'min' => '50',
+                'step' => '10',
+                'value' => $this->maxThumbHeight,
+                'errors' => $this->getErrors('maxThumbHeight'),
+            ]);
         // Render the settings template
         return Craft::$app->getView()->renderTemplate(
-            'focal-point/_components/fields/FocalPointField_settings',
+            'focal-point-field/settings.twig',
             [
                 'field' => $this,
             ]
@@ -110,38 +120,73 @@ class FocalPointField extends Field
     }
 
     /**
-     * @inheritdoc
+     * @param mixed $value
+     * @param ElementInterface|null $element
+     * @return string
+     * @throws \yii\base\InvalidConfigException
      */
-    public function getInputHtml($value, ElementInterface $element = null): string
+    public function getInputHtml(mixed $value, ?ElementInterface $element = null): string
     {
-        // Register our asset bundle
-        Craft::$app->getView()->registerAssetBundle(FocalPointFieldFieldAsset::class);
 
-        // Get our id and namespace
-        $id = Craft::$app->getView()->formatInputId($this->handle);
-        $namespacedId = Craft::$app->getView()->namespaceInputId($id);
+        /** @var Asset|null $asset */
+        $asset = null;
+        if ($element instanceof Asset) {
+            $asset = $element;
+        } else if ($element && isset($element->owner) && $element->owner instanceof Asset) {
+            $asset = $element->owner;
+        }
 
-        // Variables to pass down to our field JavaScript to let it namespace properly
-        $jsonVars = [
-            'id' => $id,
+        if (!$asset || !in_array($asset->kind, $this->allowedKinds)) {
+            return Html::tag('p', Craft::t('focal-point-field', 'This field type can only be used on images'), ['class' => 'error']);
+        }
+
+        try {
+
+            $asset->setTransform([
+                'width' => $this->maxThumbWidth * 2,
+                'height' => $this->maxThumbWidth * 2,
+                'mode' => 'fit',
+            ]);
+
+            $width = round($asset->getWidth() / 2);
+            $height = round($width * ($asset->getWidth() / $asset->getHeight()));
+
+            $img = Html::img($asset->getUrl(), [
+                'width' => $width,
+                'height' => $height,
+                'title' => Craft::t('focal-point-field', 'Click image to set focal point'),
+                'draggable' => 'false',
+                'class' => 'focalpointfield-thumb',
+            ]);
+
+        } catch (\Throwable $e) {
+            Craft::error($e->getMessage(), __METHOD__);
+
+            return Html::p('p', Craft::t('focal-point-field', 'An error occurred when trying to load this image'));
+        }
+
+        $view = Craft::$app->getView();
+
+        $namespacedId = $view->namespaceInputId(Html::id($this->handle));
+
+        $jsonVars = Json::encode([
             'name' => $this->handle,
             'namespace' => $namespacedId,
-            'prefix' => Craft::$app->getView()->namespaceInputId(''),
-        ];
-        $jsonVars = Json::encode($jsonVars);
-        Craft::$app->getView()->registerJs("$('#{$namespacedId}-field').FocalPointFocalPointField(" . $jsonVars . ");");
+        ]);
 
-        // Render the input template
-        return Craft::$app->getView()->renderTemplate(
-            'focal-point/_components/fields/FocalPointField_input',
-            [
-                'name' => $this->handle,
-                'value' => $value,
-                'field' => $this,
-                'id' => $id,
-                'namespacedId' => $namespacedId,
-                'asset' => $element->owner instanceof Asset ? $element->owner : null,
-            ]
-        );
+        $view->registerAssetBundle(FocalPointFieldAsset::class);
+        $view->registerJs("$('#{$namespacedId}-field').FocalPointField(" . $jsonVars . ");");
+
+        return
+            Html::tag('div', $img, [
+                'class' => 'focalpointfield-wrapper',
+                'style' => [
+                    'width' => "{$width}px",
+                    'max-width' => '100%',
+                ],
+            ]) .
+            Html::hiddenInput($this->handle, json_encode($value, true), [
+                'data-focalpointfield-value' => true,
+            ]);
     }
 }

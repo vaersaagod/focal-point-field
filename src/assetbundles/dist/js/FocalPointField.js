@@ -1,13 +1,8 @@
 /**
- * Focal Point plugin for Craft CMS
+ * Focal Point Field plugin for Craft CMS 4.x
  *
- * FocalPointField Field JS
- *
- * @author    Værsågod
- * @copyright Copyright (c) 2018 Værsågod
- * @link      www.vaersaagod.no
- * @package   FocalPoint
- * @since     1.0.0FocalPointFocalPointField
+ * @link      https://www.vaersaagod.no
+ * @copyright Copyright (c) 2022 Værsågod
  */
 
 ;(function ( $, window, document, undefined ) {
@@ -22,17 +17,17 @@
     function Plugin( element ) {
         $(function () {
             var $field = $(element);
-            var $wrapper = $field.find('[data-focalpointfield]');
-            var $image = $field.find('[data-focalpointfield-image]');
+            var $wrapper = $field.find('.focalpointfield-wrapper');
+            var $image = $field.find('.focalpointfield-thumb');
             var $input = $field.find('[data-focalpointfield-value]');
-            var $marker = $('<div data-focalpointfield-marker></div>');
+            var $marker = $('<div class="focalpointfield-marker" />');
             var isDragging = false;
             var currentValue = null;
 
             function placeMarker(x, y) {
                 var width = $wrapper.outerWidth();
                 var height = $wrapper.outerHeight();
-                $marker.css({ top: Math.round((y/100)*height), left: Math.round((x/100)*width) });
+                $marker.css({ left: x + '%', top: y + '%' });
             }
 
             function parseValue(val) {
@@ -101,7 +96,7 @@
         });
     }
 
-    var pluginName = 'FocalPointFocalPointField';
+    var pluginName = 'FocalPointField';
 
     $.fn.waitForImages = function () {
         var def = $.Deferred();

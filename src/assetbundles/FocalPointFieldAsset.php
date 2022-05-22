@@ -1,14 +1,12 @@
 <?php
 /**
- * Focal Point plugin for Craft CMS 3.x
+ * Focal Point Field plugin for Craft CMS 4.x
  *
- * Lorem
- *
- * @link      www.vaersaagod.no
- * @copyright Copyright (c) 2018 Værsågod
+ * @link      https://www.vaersaagod.no
+ * @copyright Copyright (c) 2022 Værsågod
  */
 
-namespace vaersaagod\focalpoint\assetbundles\focalpointfieldfield;
+namespace vaersaagod\focalpointfield\assetbundles;
 
 use Craft;
 use craft\web\AssetBundle;
@@ -19,17 +17,15 @@ use craft\web\assets\cp\CpAsset;
  * @package   FocalPoint
  * @since     1.0.0
  */
-class FocalPointFieldFieldAsset extends AssetBundle
+class FocalPointFieldAsset extends AssetBundle
 {
     // Public Methods
     // =========================================================================
 
-    /**
-     * @inheritdoc
-     */
+    /** @inheritdoc */
     public function init()
     {
-        $this->sourcePath = "@vaersaagod/focalpoint/assetbundles/focalpointfieldfield/dist";
+        $this->sourcePath = "@vaersaagod/focalpointfield/assetbundles/dist";
 
         $this->depends = [
             CpAsset::class,

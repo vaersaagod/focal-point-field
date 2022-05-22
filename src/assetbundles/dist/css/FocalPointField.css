@@ -1,0 +1,45 @@
+/**
+ * Focal Point Field plugin for Craft CMS 4.x
+ *
+ * @link      https://www.vaersaagod.no
+ * @copyright Copyright (c) 2022 Værsågod
+ */
+
+.superTableContainer .field[data-type="vaersaagod\\focalpointfield\\fields\\FocalPointField"] {
+    padding: 0 !important;
+}
+
+.focalpointfield-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    user-select: none;
+}
+
+.focalpointfield-thumb {
+    display: block;
+    width: 100%;
+    cursor: crosshair;
+    user-select: none;
+}
+
+.focalpointfield-marker {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    cursor: pointer;
+}
+
+.focalpointfield-marker::after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+}

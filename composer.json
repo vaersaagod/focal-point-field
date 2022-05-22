@@ -1,8 +1,8 @@
 {
-    "name": "vaersaagod/focal-point",
-    "description": "Brings back the custom Focal Point field",
+    "name": "vaersaagod/focal-point-field",
+    "description": "Brings back the vintage Focal Point custom fieldtype",
     "type": "craft-plugin",
-    "version": "1.0.3",
+    "version": "2.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -22,19 +22,18 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0-RC1"
+        "php": "^8.0",
+        "craftcms/cms": "^3.7.0|^4.0.3"
     },
     "autoload": {
         "psr-4": {
-          "vaersaagod\\focalpoint\\": "src/"
+          "vaersaagod\\focalpointfield\\": "src/"
         }
     },
     "extra": {
-        "name": "Focal Point",
-        "handle": "focal-point",
-        "hasCpSettings": false,
-        "hasCpSection": false,
+        "name": "Focal Point Field",
+        "handle": "focal-point-field",
         "changelogUrl": "",
-        "class": "vaersaagod\\focalpoint\\FocalPoint"
+        "class": "vaersaagod\\focalpointfield\\Plugin"
     }
 }
