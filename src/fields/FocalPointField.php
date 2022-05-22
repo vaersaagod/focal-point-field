@@ -71,9 +71,15 @@ class FocalPointField extends Field
     /** @inheritdoc */
     public function normalizeValue(mixed $value, ?ElementInterface $element = null): mixed
     {
+        if (!$value) {
+            return ['x' => 50, 'y' => 50, 'css' => '50% 50%'];
+        }
         if (is_string($value)) {
             $value = json_decode($value, true);
         }
+        // Normalize CSS value
+        [$left, $top] = explode('%', $value['css'] ?? ['50% 50%']);
+        $value['css'] = trim($left) . '% ' . trim($top) . '%';
         return $value;
     }
 

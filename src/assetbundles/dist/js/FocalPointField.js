@@ -46,7 +46,7 @@
                 $input.val(JSON.stringify({
                     x: x,
                     y: y,
-                    css: x + '% ' + y + ' %'
+                    css: x + '% ' + y + '%'
                 }));
             }
 

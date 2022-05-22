@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.0.1 - 2022-05-22
+
+### Improved
+- Added a border-radius to thumbs to make them feel a bit more native  
+
+### Fixed
+- Fixed an issue where Focal Point Field would store an invalid CSS value  
+
 ## 2.0.0 - 2022-05-21
 
 ### Added
