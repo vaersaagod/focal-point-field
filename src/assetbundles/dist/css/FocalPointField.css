@@ -21,6 +21,8 @@
     width: 100%;
     cursor: crosshair;
     user-select: none;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .focalpointfield-marker {
