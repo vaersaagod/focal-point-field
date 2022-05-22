@@ -1,43 +1,27 @@
-# Focal Point plugin for Craft CMS 3.x
+# Focal Point Field plugin for Craft CMS 4.x
 
-Lorem
-
-![Screenshot](resources/img/plugin-logo.png)
+Brings back the vintage Craft 2 Focal Point fieldtype (originally by @aelvan) to Craft 4.  
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0.0-beta.23 or later.
+This plugin requires Craft CMS 4.0.3 or later.
 
 ## Installation
 
-To install the plugin, follow these instructions.
+To install the plugin, either install it from the plugin store, or follow these instructions:
 
-1. Open your terminal and go to your Craft project:
+1. Install with composer via `composer require vaersaagod/focal-point-field` from your project directory.
+2. Install the plugin in the Craft Control Panel under Settings → Plugins, or from the command line via `./craft install/plugin focal-point-field`.
 
-        cd /path/to/project
+## Price, license and support
 
-2. Then tell Composer to load the plugin:
+The plugin is released under the MIT license. It's made for Værsågod and friends, and no support
+is given. Submitted issues are resolved if it scratches an itch.
 
-        composer require vaersaagod/focal-point
+## Changelog
 
-3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Focal Point.
+See [CHANGELOG.MD](https://raw.githubusercontent.com/vaersaagod/focal-point-field/master/CHANGELOG.md).
 
-## Focal Point Overview
+## Credits
 
--Insert text here-
-
-## Configuring Focal Point
-
--Insert text here-
-
-## Using Focal Point
-
--Insert text here-
-
-## Focal Point Roadmap
-
-Some things to do, and ideas for potential features:
-
-* Release it
-
-Brought to you by [Værsågod](www.vaersaagod.no)
+Brought to you by [Værsågod](https://www.vaersaagod.no)
