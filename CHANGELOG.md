@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.0.2 - 2022-09-04
+### Fixed
+- Fixes an issue where asset edit pages and slideouts would use Focal Point Field's transformed image for dimensions and the "View" button  
+
 ## 2.0.1 - 2022-05-22
 
 ### Improved

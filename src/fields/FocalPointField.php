@@ -142,9 +142,11 @@ class FocalPointField extends Field
             $asset = $element->owner;
         }
 
-        if (!$asset || !in_array($asset->kind, $this->allowedKinds)) {
+        if (!$asset || !in_array($asset->kind, $this->allowedKinds, true)) {
             return Html::tag('p', Craft::t('focal-point-field', 'This field type can only be used on images'), ['class' => 'error']);
         }
+
+        $asset = clone $asset;
 
         try {
 
