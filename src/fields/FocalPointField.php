@@ -11,38 +11,35 @@ namespace vaersaagod\focalpointfield\fields;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
+use craft\base\ThumbableFieldInterface;
+use craft\elements\Entry;
 use craft\helpers\Cp;
-use craft\helpers\Db;
 use craft\helpers\Json;
 use craft\helpers\Html;
 use craft\elements\Asset;
 
-use vaersaagod\focalpointfield\FocalPoint;
 use vaersaagod\focalpointfield\assetbundles\FocalPointFieldAsset;
-
-use yii\db\Schema;
 
 /**
  * @author    Værsågod
  * @package   Focal Point Field
  * @since     1.0.0
  */
-class FocalPointField extends Field
+class FocalPointField extends Field implements ThumbableFieldInterface
 {
 
     /** @var string */
     public string $defaultFocalPoint = '50% 50%';
 
-    /** @var int */
+    /** @deprecated in 3.0.0 */
     public int $maxThumbWidth = 300;
 
-    /** @var int */
+    /** @deprecated in 3.0.0 */
     public int $maxThumbHeight = 300;
 
     /** @var string[] */
     public array $allowedKinds = [Asset::KIND_IMAGE];
 
-    /** @var array|null */
     /** @deprecated in 2.0.0 */
     public ?array $defaultPointArray = null;
 
@@ -50,6 +47,11 @@ class FocalPointField extends Field
     public static function displayName(): string
     {
         return 'Focal Point Field';
+    }
+
+    public function getIcon(): ?string
+    {
+        return 'circle-dot';
     }
 
     /** @inheritdoc */
@@ -60,12 +62,6 @@ class FocalPointField extends Field
         $rules[] = [['defaultFocalPoint'], 'default', 'value' => json_encode(['x' => '50', 'y' => '50', 'css' => '50% 50%'], true)];
         $rules[] = [['maxThumbWidth', 'maxThumbHeight'], 'number', 'integerOnly' => true, 'min' => 50];
         return $rules;
-    }
-
-    /** @inheritdoc */
-    public function getContentColumnType(): string
-    {
-        return Schema::TYPE_STRING;
     }
 
     /** @inheritdoc */
@@ -93,36 +89,7 @@ class FocalPointField extends Field
                 'name' => 'defaultFocalPoint',
                 'value' => $this->defaultFocalPoint,
                 'errors' => $this->getErrors('defaultFocalPoint'),
-            ]) .
-            Cp::textFieldHtml([
-                'label' => Craft::t('focal-point-field', 'Max Thumb Width'),
-                'id' => 'maxThumbWidth',
-                'name' => 'maxThumbWidth',
-                'type' => 'number',
-                'size' => 5,
-                'min' => '50',
-                'step' => '10',
-                'value' => $this->maxThumbWidth,
-                'errors' => $this->getErrors('maxThumbWidth'),
-            ]) .
-            Cp::textFieldHtml([
-                'label' => Craft::t('focal-point-field', 'Max Thumb Height'),
-                'id' => 'maxThumbHeight',
-                'name' => 'maxThumbHeight',
-                'type' => 'number',
-                'size' => 5,
-                'min' => '50',
-                'step' => '10',
-                'value' => $this->maxThumbHeight,
-                'errors' => $this->getErrors('maxThumbHeight'),
             ]);
-        // Render the settings template
-        return Craft::$app->getView()->renderTemplate(
-            'focal-point-field/settings.twig',
-            [
-                'field' => $this,
-            ]
-        );
     }
 
     /**
@@ -133,44 +100,31 @@ class FocalPointField extends Field
      */
     public function getInputHtml(mixed $value, ?ElementInterface $element = null): string
     {
-
-        /** @var Asset|null $asset */
-        $asset = null;
-        if ($element instanceof Asset) {
-            $asset = $element;
-        } else if ($element && isset($element->owner) && $element->owner instanceof Asset) {
-            $asset = $element->owner;
-        }
-
-        if (!$asset || !in_array($asset->kind, $this->allowedKinds, true)) {
-            return Html::tag('p', Craft::t('focal-point-field', 'This field type can only be used on images'), ['class' => 'error']);
+        $asset = $this->_getAsset($element);
+        if ($asset === null || !$this->_validateAssetKind($asset)) {
+            return Html::tag('p', Craft::t('focal-point-field', 'This field type can only be used on images, or in nested entries owned by images.'), ['class' => 'error']);
         }
 
         $asset = clone $asset;
 
         try {
-
-            $asset->setTransform([
-                'width' => $this->maxThumbWidth * 2,
-                'height' => $this->maxThumbWidth * 2,
-                'mode' => 'fit',
+            $img = $asset->getImg([
+                'width' => 400
+            ], [
+                '1.5x',
+                '2x',
+                '3x',
             ]);
-
-            $width = round($asset->getWidth() / 2);
-            $height = round($width * ($asset->getWidth() / $asset->getHeight()));
-
-            $img = Html::img($asset->getUrl(), [
-                'width' => $width,
-                'height' => $height,
+            $img = Html::modifyTagAttributes($img, [
                 'title' => Craft::t('focal-point-field', 'Click image to set focal point'),
                 'draggable' => 'false',
-                'class' => 'focalpointfield-thumb',
+                'class' => 'focalpointfield-image',
             ]);
 
         } catch (\Throwable $e) {
             Craft::error($e->getMessage(), __METHOD__);
 
-            return Html::p('p', Craft::t('focal-point-field', 'An error occurred when trying to load this image'));
+            return Html::tag('p', Craft::t('focal-point-field', 'An error occurred when trying to load this image'));
         }
 
         $view = Craft::$app->getView();
@@ -185,16 +139,95 @@ class FocalPointField extends Field
         $view->registerAssetBundle(FocalPointFieldAsset::class);
         $view->registerJs("$('#{$namespacedId}-field').FocalPointField(" . $jsonVars . ");");
 
+        $marker = Html::tag(
+            'button',
+            Html::tag('div', '', [
+                'class' => 'focalpointfield-marker-focal-point',
+            ]),
+            [
+                'type' => 'button',
+                'class' => 'focalpointfield-marker',
+                'hidden' => true,
+            ]
+        );
+
         return
-            Html::tag('div', $img, [
+            Html::tag('div', $img . $marker, [
                 'class' => 'focalpointfield-wrapper',
-                'style' => [
-                    'width' => "{$width}px",
-                    'max-width' => '100%',
-                ],
             ]) .
             Html::hiddenInput($this->handle, json_encode($value, true), [
                 'data-focalpointfield-value' => true,
             ]);
+    }
+
+    /**
+     * @param mixed $value
+     * @param ElementInterface $element
+     * @param int $size
+     * @return string|null
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getThumbHtml(mixed $value, ElementInterface $element, int $size): ?string
+    {
+        $asset = $this->_getAsset($element);
+        if ($asset === null || !$this->_validateAssetKind($asset)) {
+            return null;
+        }
+
+        $img = $asset->getThumbHtml($size);
+        if (empty($img)) {
+            return null;
+        }
+
+        Craft::$app->getView()->registerAssetBundle(FocalPointFieldAsset::class);
+
+        $marker = '';
+        $value = $this->normalizeValue($value);
+        if (is_array($value) && isset($value['x']) && isset($value['y'])) {
+            $marker = Html::tag(
+                'div',
+                Html::tag('div', '', [
+                    'class' => 'focalpointfield-marker-focal-point',
+                ]),
+                [
+                    'class' => 'focalpointfield-marker',
+                    'style' => "left: {$value['x']}%; top: {$value['y']}%;",
+                ]
+            );
+        }
+
+        return Html::tag('div', $img . $marker, [
+            'class' => 'focalpointfield-thumb',
+        ]);
+    }
+
+    /**
+     * @param ElementInterface|null $element
+     * @return Asset|null
+     * @throws \yii\base\InvalidConfigException
+     */
+    private function _getAsset(?ElementInterface $element): ?Asset
+    {
+        $asset = null;
+        if ($element instanceof Asset) {
+            $asset = $element;
+        } else if ($element instanceof Entry) {
+            $asset = $element->getOwner();
+        }
+
+        if (!$asset instanceof Asset) {
+            return null;
+        }
+
+        return $asset;
+    }
+
+    /**
+     * @param Asset $asset
+     * @return bool
+     */
+    private function _validateAssetKind(Asset $asset): bool
+    {
+        return in_array($asset->kind, $this->allowedKinds, true);
     }
 }

@@ -1,10 +1,10 @@
-# Focal Point Field plugin for Craft CMS 4.x
+# Focal Point Field plugin for Craft CMS 5.x
 
-Brings back the vintage Craft 2 Focal Point fieldtype (originally by @aelvan) to Craft 4.  
+Brings back the vintage Craft 2 Focal Point fieldtype (originally by @aelvan) to Craft 5.  
 
 ## Requirements
 
-This plugin requires Craft CMS 4.0.3 or later.
+This plugin requires Craft CMS 5.10.0 or later.
 
 ## Installation
 

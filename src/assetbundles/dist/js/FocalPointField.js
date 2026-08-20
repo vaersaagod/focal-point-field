@@ -18,9 +18,9 @@
         $(function () {
             var $field = $(element);
             var $wrapper = $field.find('.focalpointfield-wrapper');
-            var $image = $field.find('.focalpointfield-thumb');
+            var $image = $field.find('.focalpointfield-image');
             var $input = $field.find('[data-focalpointfield-value]');
-            var $marker = $('<div class="focalpointfield-marker" />');
+            var $marker = $field.find('.focalpointfield-marker');//$('<div class="focalpointfield-marker" />');
             var isDragging = false;
             var currentValue = null;
 
@@ -28,10 +28,11 @@
                 var width = $wrapper.outerWidth();
                 var height = $wrapper.outerHeight();
                 $marker.css({ left: x + '%', top: y + '%' });
+                $marker.get(0).hidden = false;
             }
 
             function parseValue(val) {
-                $wrapper.append($marker);
+                //$wrapper.append($marker);
                 try {
                     currentValue = JSON.parse($input.val());
                 } catch(e) {

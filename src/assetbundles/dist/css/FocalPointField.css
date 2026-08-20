@@ -5,43 +5,63 @@
  * @copyright Copyright (c) 2022 Værsågod
  */
 
-.superTableContainer .field[data-type="vaersaagod\\focalpointfield\\fields\\FocalPointField"] {
-    padding: 0 !important;
-}
-
 .focalpointfield-wrapper {
     position: relative;
     width: 100%;
-    max-width: 300px;
     user-select: none;
 }
 
-.focalpointfield-thumb {
+.focalpointfield-image {
     display: block;
     width: 100%;
     cursor: crosshair;
     user-select: none;
     border-radius: 5px;
     overflow: hidden;
+    align-self: flex-start;
 }
 
 .focalpointfield-marker {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    width: 0px;
+    height: 0px;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+}
+
+.focalpointfield-marker-focal-point {
+    background: rgba(0, 0, 0, .5);
+    border: 2px solid hsla(0, 0%, 100%, .8);
+    border-radius: 20px;
+    height: 20px;
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
     cursor: pointer;
 }
 
-.focalpointfield-marker::after {
+.focalpointfield-marker-focal-point::after {
     content: "";
-    display: block;
+    background: hsla(0, 0%, 100%, .8);
+    border: 2px solid hsla(0, 0%, 100%, .8);
+    border-radius: 4px;
+    height: 0;
+    inset-block-start: 6px;
+    inset-inline-start: 6px;
     position: absolute;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.4);
-    border: 2px solid rgba(255, 255, 255, 0.9);
+    width: 0;
+}
+
+.focalpointfield-thumb {
+    border-radius: 5px;
+    overflow: hidden;
+    align-self: flex-start;
+    position: relative;
+    pointer-events: none;
+}
+
+.focalpointfield-thumb .focalpointfield-marker {
+    transform: scale(0.85);
 }

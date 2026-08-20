@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+### 3.0.0
+### Added
+- Craft 5 compatibility
+
+### Changed
+- The "Maximum thumb width" and "Maximum thumb height" are now deprecated
+
 ## 2.0.2 - 2022-09-04
 ### Fixed
 - Fixes an issue where asset edit pages and slideouts would use Focal Point Field's transformed image for dimensions and the "View" button  

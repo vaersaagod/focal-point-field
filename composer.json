@@ -2,7 +2,7 @@
     "name": "vaersaagod/focal-point-field",
     "description": "Brings back the vintage Focal Point custom fieldtype",
     "type": "craft-plugin",
-    "version": "2.0.2",
+    "version": "3.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -22,8 +22,8 @@
         }
     ],
     "require": {
-        "php": "^8.0.2",
-        "craftcms/cms": "^4.0.3"
+        "php": "^8.2.0",
+        "craftcms/cms": "^5.10"
     },
     "autoload": {
         "psr-4": {
